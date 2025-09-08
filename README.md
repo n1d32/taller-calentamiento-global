@@ -118,3 +118,33 @@ Desarrollar creatividad y autonomía para modificar y mejorar lo aprendido
 
 ### Metodología
 Feria creativa, intercambio horizontal, reflexión crítica sobre el aprendizaje y el problema socioambiental
+
+---
+
+## Materiales necesarios para las sesiones 2-4
+
+### Sesión 2: Sensores
+- Placas Arduino/ESP32 (1 por grupo)
+- Potenciómetros (3-4 por grupo, para simular sensores)
+- Cables jumper (conjunto suficiente para conexiones)
+- Protoboards (1 por grupo)
+- Computadoras con Arduino IDE instalado
+- Cables USB para programación
+
+### Sesión 3: Procesamiento de información  
+- Placas Arduino/ESP32 (1 por grupo)
+- Potenciómetros (3 por grupo: temperatura, CO₂, luz)
+- Cables jumper
+- Protoboards (1 por grupo)
+- Computadoras con Arduino IDE
+- Cables USB
+
+### Sesión 4: Actuadores
+- Placas Arduino/ESP32 (1 por grupo)
+- LEDs de colores (rojo, amarillo, verde - 1 de cada por grupo)
+- Resistencias 220Ω (3 por grupo, para los LEDs)
+- Potenciómetros (1 por grupo, para simular sensor de temperatura)
+- Cables jumper
+- Protoboards (1 por grupo)
+- Computadoras con Arduino IDE
+- Cables USB
