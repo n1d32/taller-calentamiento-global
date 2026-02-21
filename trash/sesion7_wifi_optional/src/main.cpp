@@ -1,8 +1,6 @@
 #include <WiFi.h>
 #include <WebServer.h>
-
-const char* ssid = "VTR-2768272";
-const char* password = "kmrypmXm47bd";
+#include "wifi_config.h"
 
 WebServer server(80); // Puerto 80
 
@@ -19,18 +17,32 @@ String deviceName = "Ciencia al Tiro - Modulo 1";
 bool enableFeature = true;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   
-  // Conectar WiFi
+  // Configurar pin 2 como salida para el LED
+  pinMode(2, OUTPUT);
+  
+  // Conectar WiFi con timeout
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  
+  Serial.print("Conectando a WiFi: ");
+  Serial.println(ssid);
+  
+  unsigned long startTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 15000) {
     delay(500);
     Serial.print(".");
   }
   
-  Serial.println("\n✅ WiFi conectado!");
-  Serial.print("📡 IP: ");
-  Serial.println(WiFi.localIP());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\n✅ WiFi conectado!");
+    Serial.print("📡 IP: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("\n❌ Falló la conexión WiFi!");
+    Serial.println("Estado: " + String(WiFi.status()));
+  }
 
   // Configurar rutas API
   server.on("/api/status", HTTP_GET, []() {

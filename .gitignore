@@ -3,6 +3,9 @@
 .pioenvs
 .piolibdeps
 
+# WiFi configuration (sensitive data)
+wifi_config.h
+
 # Arduino IDE build files
 *.elf
 *.hex

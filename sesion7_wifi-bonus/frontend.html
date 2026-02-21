@@ -88,7 +88,7 @@ export default {
       this.loading = true;
       this.error = '';
       try {
-        const response = await fetch(`http://${import.meta.env.VITE_ESP32_IP || '192.168.0.2'}/api/status`);
+        const response = await fetch(`http://${import.meta.env.VITE_ESP32_IP || '192.168.8.8'}/api/status`);
         if (!response.ok) {
           throw new Error(`Error HTTP! estado: ${response.status}`);
         }
@@ -105,7 +105,7 @@ export default {
       this.updating = true;
       this.updateMessage = '';
       try {
-        const response = await fetch(`http://${import.meta.env.VITE_ESP32_IP || '192.168.0.2'}/api/update`, {
+        const response = await fetch(`http://${import.meta.env.VITE_ESP32_IP || '192.168.8.8'}/api/update`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
