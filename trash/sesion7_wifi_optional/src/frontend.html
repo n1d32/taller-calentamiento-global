@@ -1,0 +1,330 @@
+<template>
+  <div id="app">
+    <div class="container">
+      <h1>Calentamiento Global</h1>
+
+      <!-- Status Display -->
+      <div class="status-section">
+        <h2>Estado Actual</h2>
+        <div v-if="loading" class="loading">Cargando estado...</div>
+        <div v-else-if="error" class="error">{{ error }}</div>
+        <div v-else class="status-info">
+          <div class="status-item">
+            <label>Lugar:</label>
+            <span>{{ status.name }}</span>
+          </div>
+          <div class="status-item">
+            <label>Temperatura:</label>
+            <span>{{ status.brightness }}</span>
+          </div>
+          <div class="status-item">
+            <label>Medidas implementadas:</label>
+            <span>{{ status.feature ? 'Sí' : 'No' }}</span>
+          </div>
+        </div>
+        <button @click="fetchStatus" class="refresh-btn">Actualizar Estado</button>
+      </div>
+
+      <!-- Update Controls -->
+      <div class="control-section">
+        <h2>Actualizar Estado</h2>
+        <form @submit.prevent="updateSettings" class="control-form">
+          <div class="form-group">
+            <label for="name">Lugar:</label>
+            <input type="text" id="name" v-model="form.name" placeholder="Ingrese nombre del dispositivo">
+          </div>
+
+          <div class="form-group">
+            <label for="brightness">Temperatura (0-255):</label>
+            <input type="range" id="brightness" v-model.number="form.brightness" min="0" max="255">
+            <span>{{ form.brightness }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="feature">Implementar medidas:</label>
+            <input type="checkbox" id="feature" v-model="form.feature">
+          </div>
+
+          <button type="submit" :disabled="updating" class="update-btn">
+            {{ updating ? 'Actualizando...' : 'Actualizar Estado' }}
+          </button>
+          <div v-if="updateMessage" class="update-message">{{ updateMessage }}</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+  data() {
+    return {
+      status: {
+        brightness: 0,
+        name: '',
+        feature: false
+      },
+      form: {
+        brightness: 50,
+        name: '',
+        feature: true
+      },
+      loading: false,
+      error: '',
+      updating: false,
+      updateMessage: ''
+    }
+  },
+  async mounted() {
+    await this.fetchStatus();
+    // Pre-fill form with current status
+    this.form.brightness = this.status.brightness;
+    this.form.name = this.status.name;
+    this.form.feature = this.status.feature;
+  },
+  methods: {
+    async fetchStatus() {
+      this.loading = true;
+      this.error = '';
+      try {
+        const response = await fetch(`http://${import.meta.env.VITE_ESP32_IP || '192.168.8.8'}/api/status`);
+        if (!response.ok) {
+          throw new Error(`Error HTTP! estado: ${response.status}`);
+        }
+        const data = await response.json();
+        this.status = data;
+      } catch (err) {
+        this.error = `Error al obtener estado: ${err.message}`;
+        console.error('Error obteniendo estado:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async updateSettings() {
+      this.updating = true;
+      this.updateMessage = '';
+      try {
+        const response = await fetch(`http://${import.meta.env.VITE_ESP32_IP || '192.168.8.8'}/api/update`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            brightness: this.form.brightness,
+            name: this.form.name,
+            feature: this.form.feature.toString()
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP! estado: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.updateMessage = '¡Configuración actualizada exitosamente!';
+
+        // Refresh status to get updated values
+        setTimeout(() => this.fetchStatus(), 500);
+
+      } catch (err) {
+        this.updateMessage = `Error al actualizar configuración: ${err.message}`;
+        console.error('Error actualizando configuración:', err);
+      } finally {
+        this.updating = false;
+      }
+    }
+  }
+}
+</script>
+
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+}
+
+h2 {
+  color: #555;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.status-section,
+.control-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.status-info {
+  margin-bottom: 15px;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.status-item:last-child {
+  border-bottom: none;
+}
+
+.status-item label {
+  font-weight: 600;
+  color: #555;
+}
+
+.status-item span {
+  color: #333;
+  font-weight: 500;
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.error {
+  color: #dc3545;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+.refresh-btn,
+.update-btn {
+  width: 100%;
+  padding: 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.refresh-btn:hover,
+.update-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.update-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.control-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="range"] {
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="range"]:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-group input[type="range"] {
+  width: 100%;
+}
+
+.form-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.update-message {
+  text-align: center;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.update-message:not(:empty) {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+@media (max-width: 600px) {
+  .container {
+    margin: 10px;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.3rem;
+  }
+}
+</style>
