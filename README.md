@@ -1,6 +1,6 @@
 # Taller: Sistemas Embebidos - De Sensores a Actuadores
 
-Un taller práctico que guía a los participantes a través del proceso completo de diseño e implementación de un sistema embebido. Desde el análisis de componentes hasta la integración de sensores, procesamiento de datos y control de actuadores, este taller proporciona una base sólida en electrónica y programación de microcontroladores.
+Un taller práctico que guía a los participantes a través del proceso completo de diseño e implementación de los denominados "sistemas embebidos". Desde el análisis de componentes hasta la integración de sensores, procesamiento de datos y control de actuadores, este taller proporciona una base sólida en electrónica y programación de microcontroladores.
 
 El taller está diseñado como un framework genérico que puede adaptarse a múltiples temáticas (monitoreo ambiental, automatización, robótica, etc.), permitiendo a los instructores personalizar el contenido según sus necesidades específicas.
 
@@ -15,10 +15,16 @@ El taller está diseñado como un framework genérico que puede adaptarse a múl
 
 ---
 
+# Calendarización
+- 6 sesiones de 45 min o 3 sesiones de 90 minutos
+
+---
+
 ## Sesión 1: Desarmando el sistema
 
-### Objetivo transversal
-Comprender que un problema complejo puede analizarse en partes más simples (pensamiento analítico/sintético)
+### Objetivos transversales
+- Comprender que un problema complejo puede analizarse en partes más simples (pensamiento analítico/sintético).
+- Imaginar analogías entre sistemas como sensor - procesamiento - actuador versus sentidos - cerebro - movimiento.
 
 ### Objetivos específicos
 - **Electrónica**: Reconocer los componentes físicos: sensores, actuadores, placa Arduino/ESP32, cables, resistencias
