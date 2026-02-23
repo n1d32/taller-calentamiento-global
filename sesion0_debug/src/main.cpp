@@ -16,5 +16,5 @@ void setup() {
 void loop() {
   digitalWrite(2, !digitalRead(2)); // Toggle LED
   Serial.printf("Uptime: %lu segundos\n", millis()/1000);
-  delay(1000);
+  delay(500);
 }
