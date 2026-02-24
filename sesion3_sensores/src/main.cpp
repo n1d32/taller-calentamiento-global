@@ -4,12 +4,12 @@
 // El estudiante debe aprender a comentar su código
 // Los estudiantes aprenden de código libre al revisar en conjunto
 // Aprenderá a modularizar usando diferentes funciones
-int pinLed = 2; // LED integrado en la mayoría de ESP32
+int pinLed = 15; // LED integrado en la mayoría de ESP32
 int tiempoArriba = 1000;
 int tiempoAbajo = 500;
-char* mensaje = "LED encendido";
+// char* mensaje = "LED encendido";
 
-const int pinBoton = 15;   // Pin para el botón (usar resistencia pull-up interna)
+const int pinBoton = 13;   // Pin para el botón (usar resistencia pull-up interna)
 int estadoBoton;
 
 void setup() {
@@ -27,7 +27,7 @@ void leerEstadoBoton () {
 
 void cambiarEstadoLed() {
   digitalWrite(pinLed, HIGH); // LED arriba
-  Serial.println(mensaje);
+  // Serial.println(mensaje);
   leerEstadoBoton();
   delay(tiempoArriba);
   digitalWrite(pinLed, LOW); // LED abajo
