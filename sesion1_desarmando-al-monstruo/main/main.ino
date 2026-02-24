@@ -2,7 +2,7 @@
 
 // Definición de pines
 const int ledPinVerde = 19;      // Primer LED (verde)
-const int ledPinRojo = 15;       // Segundo LED (rojo)
+const int ledPinRojo = 13;       // Segundo LED (rojo)
 const int buttonPinVerde = 21;    // Botón para el primer LED (verde)
 const int buttonPinRojo = 12;    // Botón para el segundo LED (rojo)
 
@@ -18,12 +18,17 @@ int lastButtonStateRojo = HIGH; // Estado anterior del botón (HIGH cuando no pr
 int buttonStateRojo = HIGH;     // Estado actual del botón
 
 // Variables de estado del sistema
-enum SystemState { NORMAL, FEEDBACK };
+enum SystemState { NORMAL, FEEDBACK, CELEBRATION };
 SystemState currentState = NORMAL;
 
 // Variables para control de LEDs
 bool lastLEDWasVerde = true;     // Para probabilidad 70/30
 int currentActiveLED = 0;        // 0 para verde, 1 para rojo
+
+// Variables para seguimiento de progreso
+int correctCount = 0;            // Contador de respuestas correctas
+int totalAttempts = 0;           // Contador total de intentos
+int lastCelebrationCount = 0;    // Último conteo celebrado
 
 void setup() {
   Serial.begin(115200);
@@ -42,13 +47,17 @@ void setup() {
   Serial.print("Chip: ");
   Serial.println(ESP.getChipModel());
   Serial.println("Instrucciones:");
-  Serial.println("1. Se encenderá aleatoriamente un LED (verde en pin 13 o rojo en pin 15)");
+  Serial.println("1. Se encenderá aleatoriamente un LED:");
+  Serial.println("   - LED Verde: pin 19");
+  Serial.println("   - LED Rojo: pin 13");
   Serial.println("2. Probabilidad: 70% mismo LED que antes, 30% LED diferente");
   Serial.println("3. Presiona el botón CORRECTO cuando el LED esté ENCENDIDO:");
-  Serial.println("   - LED Verde encendido → Botón Verde (pin 2)");
+  Serial.println("   - LED Verde encendido → Botón Verde (pin 21)");
   Serial.println("   - LED Rojo encendido → Botón Rojo (pin 12)");
   Serial.println("4. Presionar botón INCORRECTO o cuando LED apagado → Feedback de error");
+  Serial.println("5. Cada 5 respuestas correctas: ¡Celebración con baile de LEDs!");
   Serial.println("Feedback de error: LEDs parpadean rápidamente");
+  Serial.println("Celebración: LEDs bailan juntos y alternados");
   Serial.println("Listo para comenzar...");
   Serial.println("--------------------");
 }
@@ -141,9 +150,46 @@ void wrongPressFeedback() {
   Serial.println("Feedback completado - Volviendo a operación normal");
 }
 
+// Función para celebrar progreso (cada 5 respuestas correctas)
+void celebrateProgress() {
+  Serial.println("¡¡¡CELEBRACIÓN!!! ¡5 respuestas correctas! ¡Bailen los LEDs!");
+  
+  // Apagar ambos LEDs al inicio
+  digitalWrite(ledPinVerde, LOW);
+  digitalWrite(ledPinRojo, LOW);
+  delay(1000);
+  
+  // 1. Ambos LEDs ON/OFF juntos dos veces (500ms intervalo)
+  for (int i = 0; i < 2; i++) {
+    digitalWrite(ledPinVerde, HIGH);
+    digitalWrite(ledPinRojo, HIGH);
+    delay(500);
+    digitalWrite(ledPinVerde, LOW);
+    digitalWrite(ledPinRojo, LOW);
+    delay(500);
+  }
+  
+  // 2. LEDs alternan parpadeando dos veces (250ms intervalo)
+  for (int i = 0; i < 2; i++) {
+    digitalWrite(ledPinVerde, HIGH);
+    digitalWrite(ledPinRojo, LOW);
+    delay(500);
+    digitalWrite(ledPinVerde, LOW);
+    digitalWrite(ledPinRojo, HIGH);
+    delay(500);
+  }
+  
+  // Apagar ambos LEDs al final
+  digitalWrite(ledPinVerde, LOW);
+  digitalWrite(ledPinRojo, LOW);
+  delay(500);
+  
+  Serial.println("Celebración completada - ¡Sigue así!");
+}
+
 // Función para manejar la lógica de los botones
 void handleButtonPress() {
-  // Ignorar pulsaciones durante feedback
+  // Ignorar pulsaciones durante feedback o celebración
   if (currentState != NORMAL) {
     return;
   }
@@ -151,6 +197,9 @@ void handleButtonPress() {
   int buttonPressed = checkButtonsPressed();
   
   if (buttonPressed > 0) {
+    // Incrementar contador total de intentos
+    totalAttempts++;
+    
     // Pequeña pausa para estabilizar la lectura
     delay(10);
     
@@ -182,6 +231,20 @@ void handleButtonPress() {
       Serial.print("¡Correcto! Presionaste botón ");
       Serial.print(buttonPressed == 1 ? "Verde" : "Rojo");
       Serial.println(" cuando el LED correspondiente estaba ENCENDIDO");
+      
+      // Incrementar contador de respuestas correctas
+      correctCount++;
+      
+      // Verificar si es momento de celebrar (cada 5 respuestas correctas)
+      if (correctCount % 5 == 0 && correctCount > lastCelebrationCount) {
+        Serial.print("¡Logro alcanzado! ");
+        Serial.print(correctCount);
+        Serial.println(" respuestas correctas. ¡Celebremos!");
+        lastCelebrationCount = correctCount;
+        currentState = CELEBRATION;
+        celebrateProgress();
+        currentState = NORMAL;
+      }
     } else {
       // Presión incorrecta - activar feedback
       Serial.print("¡Error! Presionaste botón ");
@@ -196,6 +259,7 @@ void handleButtonPress() {
       currentState = FEEDBACK;
       wrongPressFeedback();
       currentState = NORMAL;
+      correctCount = 0;
     }
     
     // Esperar a que se suelte el botón presionado
@@ -238,10 +302,10 @@ void ledManagement() {
   // Encender el LED seleccionado
   if (lastLEDWasVerde) {
     digitalWrite(ledPinVerde, HIGH);
-    Serial.println("LED Verde ENCENDIDO (pin 13)");
+    Serial.println("LED Verde ENCENDIDO (pin 19)");
   } else {
     digitalWrite(ledPinRojo, HIGH);
-    Serial.println("LED Rojo ENCENDIDO (pin 15)");
+    Serial.println("LED Rojo ENCENDIDO (pin 13)");
   }
   
   // Tiempo ON aleatorio (300-500ms)
