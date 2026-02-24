@@ -2,7 +2,7 @@
 
 // Definición de pines
 const int ledPinVerde = 19;      // Primer LED (verde)
-const int ledPinRojo = 13;       // Segundo LED (rojo)
+const int ledPinRojo = 15;       // Segundo LED (rojo)
 const int buttonPinVerde = 21;    // Botón para el primer LED (verde)
 const int buttonPinRojo = 12;    // Botón para el segundo LED (rojo)
 
